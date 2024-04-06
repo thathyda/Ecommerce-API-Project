@@ -1,0 +1,19 @@
+version: '3'
+services:
+  thyda:
+    image: thyda
+    container_name: da
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 3276:3000
+    environment:
+      - NODE_ENV=production
+      - GENERATE_SOURCEMAP=false
+    networks:
+      - devops
+networks:
+    devops:
+      external: true
