@@ -1,3 +1,5 @@
+import { Linden_Hill } from 'next/font/google';
+import Link from 'next/link';
 import React from 'react'
 
 export const page = () => {
@@ -12,14 +14,13 @@ export const page = () => {
                     Mauris eleifend velit a pretium iaculis. Donec sagittis velit et magna euismod, vel aliquet nulla
                     malesuada. Nunc pharetra massa lectus, a fermentum arcu volutpat vel.</p>
                 <div className="mt-8">
-                    <a href="#" className="text-blue-500 hover:text-blue-600 font-medium">Learn more about us
-                        <span className="ml-2">&#8594;</span></a>
+                    <Linknp href="#" className="text-blue-500 hover:text-blue-600 font-medium">Learn more about us
+                        <span className="ml-2">&#8594;</span></Linknp>
                 </div>
             </div>
             <div className="mt-12 md:mt-0">
                 <img src="/picone.jpg" alt="About Us Image" className="object-cover rounded-lg shadow-md"></img>
-                
-            </div>
+         </div>
         </div>
     </div>
 </section>
