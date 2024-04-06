@@ -1,4 +1,3 @@
-import UserTable from "@/components/tables/UserTable";
 import React from "react";
 import { Suspense } from "react";
 import LoadingComponent from "./loading";
@@ -28,6 +27,7 @@ export default async function Home() {
                 <CardComponent
                   name={product.name}
                   image={product.image}
+                  price={product.price}
                 />
               </Link>
             );
