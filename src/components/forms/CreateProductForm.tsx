@@ -24,6 +24,21 @@ const validationSchema = Yup.object().shape({
       return SUPPORTED_FORMATS.includes(value.type);
     })
     .required("Required"),
+  categoryName: Yup.string().required("Category name is required"),
+  categoryImage: Yup.mixed()
+    .test("fileSize", "File too large", (value: any) => {
+      if (!value) {
+        return true;
+      }
+      return value.size <= FILE_SIZE;
+    })
+    .test("fileFormat", "Unsupported Format", (value: any) => {
+      if (!value) {
+        return true;
+      }
+      return SUPPORTED_FORMATS.includes(value.type);
+    })
+    .required("Required"),
 });
 
 const fieldStyle = "border border-gray-300 rounded-md";
@@ -33,20 +48,16 @@ const CreateProductForm = () => {
   myHeaders.append("Content-Type", "application/json");
   myHeaders.append(
     "Authorization",
-    "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0Mjg3MDg1LCJpYXQiOjE3MTIxMjcwODUsImp0aSI6IjZlNTZjZmVhMmYzNjQ5MWZiODBjNjQzMDUxMGNmYjBjIiwidXNlcl9pZCI6Mjd9.y7Q1_2jGpWzLIbNDS1eMdeybyi9Is4TfenCC3Fu3YYo"
+    "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0NzUxNDYyLCJpYXQiOjE3MTI1OTE0NjIsImp0aSI6ImRkOWU0NTUyZWI2ZDRjODBiYjU5YThkMDQ3NjM4YzAyIiwidXNlcl9pZCI6MjZ9.njPrzIxI-CR_8KpSlRwjBfNFcPzhck0rCtqWh-R70Q4"
   );
   myHeaders.append(
     "Cookie",
-    "csrftoken=GRqwv2b5Hy7cdCEWxJ3awPkre0LuihlQN6iRxWggvNJNIjPhFcKwanvS3vNqYtLF; sessionid=qs5l7g6fua0us31wew30hxgkew3puisp"
+    "csrftoken=nGSE1UjMNA4oKbIAd00u3o8N4PyPDThYwrITgDuXsntVdSJhZ4PGtD0KVDIHVSsS; sessionid=2wahcy9e16hp8czdl7ditx5unhrqtore"
   );
 
   const handleSubmitToServer = async (values: any) => {
-    // axios is used to make HTTP requests to the server
     try {
-      const response = await axios.post(
-        `${BASE_API_URL}file/product/`,
-        values.image
-      );
+      const response = await axios.post(`${BASE_API_URL}file/product/`, values);
       return response.data.image;
     } catch (error) {
       console.log(error);
@@ -55,7 +66,9 @@ const CreateProductForm = () => {
 
   const handleCreateProduct = async (values: any, imageData: any) => {
     try {
-      const imageUrl = await handleSubmitToServer(imageData);
+      const imageUrl = await handleSubmitToServer(imageData.image);
+      const categoryIconUrl = await handleSubmitToServer(values.categoryImage);
+
       console.log("data: ", values);
       const postData = await fetch(`${BASE_API_URL}products/`, {
         method: "POST",
@@ -63,22 +76,30 @@ const CreateProductForm = () => {
         body: JSON.stringify({
           ...values,
           image: imageUrl,
+          category: {
+            name: values.categoryName,
+            icon: categoryIconUrl,
+          },
         }),
       });
+
       console.log("post data: ", postData);
+
+      if (postData.status === 201) {
+        window.alert("Product created successfully!");
+      }
     } catch (error) {
       console.log(error);
     }
   };
 
+
   return (
     <div className="w-full pt-9">
       <Formik
         onSubmit={(values: any, { setSubmitting, resetForm }) => {
-          console.log(values);
           const formData = new FormData();
           formData.append("image", values.image);
-          //   handleSubmitToServer({ image: formData });
           handleCreateProduct(values, { image: formData });
           setSubmitting(false);
           resetForm();
@@ -86,14 +107,16 @@ const CreateProductForm = () => {
         validationSchema={validationSchema}
         initialValues={{
           category: {
-            name: "Hiking shoes",
-            icon: "https://hips.hearstapps.com/vader-prod.s3.amazonaws.com/1693342954-rincon-3-64ee5ca62e001.jpg?crop=1xw:1xh;center,top&resize=980:*",
+            name: "",
+            icon: undefined,
           },
           name: "",
           desc: "",
           image: undefined,
           price: 0,
           quantity: 0,
+          categoryName: "",
+          categoryImage: undefined,
         }}
       >
         {({ isSubmitting, setFieldValue }) => (
@@ -107,9 +130,21 @@ const CreateProductForm = () => {
                 name="name"
                 type="text"
               />
-              {/* <ErrorMessage name="email">
-                {(msg) => <p className="text-red-600 text-sm italic">{msg}</p>}
-              </ErrorMessage> */}
+            </div>
+            {/* Category Name */}
+            <div className="flex flex-col gap-2">
+              <label htmlFor="categoryName">Category Name: </label>
+              <Field
+                placeholder="Enter category name"
+                className={fieldStyle}
+                name="categoryName"
+                type="text"
+              />
+              <ErrorMessage
+                name="categoryName"
+                component="div"
+                className="text-red-600"
+              />
             </div>
             {/* description */}
             <div className="flex flex-col gap-2">
@@ -120,9 +155,6 @@ const CreateProductForm = () => {
                 name="desc"
                 type="text"
               />
-              {/* <ErrorMessage name="email">
-                {(msg) => <p className="text-red-600 text-sm italic">{msg}</p>}
-              </ErrorMessage> */}
             </div>
             {/* price */}
             <div className="flex flex-col gap-2">
@@ -133,9 +165,6 @@ const CreateProductForm = () => {
                 name="price"
                 type="number"
               />
-              {/* <ErrorMessage name="email">
-                {(msg) => <p className="text-red-600 text-sm italic">{msg}</p>}
-              </ErrorMessage> */}
             </div>
             {/* quantity */}
             <div className="flex flex-col gap-2">
@@ -146,73 +175,87 @@ const CreateProductForm = () => {
                 name="quantity"
                 type="number"
               />
-              {/* <ErrorMessage name="email">
-                {(msg) => <p className="text-red-600 text-sm italic">{msg}</p>}
-              </ErrorMessage> */}
-
-              {/* Image  */}
+              {/* Image */}
               <div>
+                <label htmlFor="image">Product Image: </label>
                 <Field
                   name="image"
                   className={fieldStyle}
                   type="file"
                   title="Select a file"
-                  setFieldValue={setFieldValue} // Set Formik value
-                  component={CustomInput} // component prop used to render the custom input
+                  setFieldValue={setFieldValue}
+                  component={CustomInput}
                 />
-                <ErrorMessage name="image">
-                  {(msg) => <div className="text-danger">{msg}</div>}
-                </ErrorMessage>
+                <ErrorMessage
+                  name="image"
+                  component="div"
+                  className="text-red-600"
+                />
+              </div>
+              {/* Category Image */}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="categoryImage">Category Icon: </label>
+                <Field
+                  name="categoryImage"
+                  className={fieldStyle}
+                  type="file"
+                  title="Select a file"
+                  setFieldValue={setFieldValue}
+                  component={CustomInput}
+                />
+                <ErrorMessage
+                  name="categoryImage"
+                  component="div"
+                  className="text-red-600"
+                />
               </div>
             </div>
             <div>
               <button
                 type="submit"
-                className="w-full px-4 py-3 bg-pink-600 text-white rounded-md"
-                disabled={isSubmitting}
+                className="w-full px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-md"
               >
-                Create
+                Create Product
               </button>
             </div>
           </Form>
-        )}
-      </Formik>
-    </div>
-  );
-};
 
+)}
+</Formik>
+</div>
+);
+};
 export default CreateProductForm;
 
 // custom Input
 function CustomInput({ field, form, setFieldValue, ...props }: any) {
-  const [previewImage, setPreviewImage] = useState<string | undefined>(
-    undefined
-  );
-  const name = field.name;
-  const onChange: any = (event: any) => {
-    console.log("event:", event.currentTarget.files);
-    const file = event.currentTarget.files[0];
-    setFieldValue(name, file);
-    setPreviewImage(URL.createObjectURL(file));
-  };
+const [previewImage, setPreviewImage] = useState<string | undefined>(
+undefined
+);
+const name = field.name;
+const onChange: any = (event: any) => {
+const file = event.currentTarget.files[0];
+setFieldValue(name, file);
+setPreviewImage(URL.createObjectURL(file));
+};
 
-  return (
-    <div className="flex flex-col gap-4 justify-center">
-      <input
-        type="file"
-        onChange={onChange}
-        {...props}
-        className="border border-gray-300 rounded-md"
-      />
-      {previewImage && (
-        <Image
-          className="rounded-md"
-          src={previewImage}
-          alt="preview Image"
-          width={100}
-          height={100}
-        />
-      )}
-    </div>
-  );
+return (
+<div className="flex flex-col gap-4 justify-center">
+<input
+  type="file"
+  onChange={onChange}
+  {...props}
+  className="border border-gray-300 rounded-md"
+/>
+{previewImage && (
+  <Image
+    className="rounded-md"
+    src={previewImage}
+    alt="preview Image"
+    width={100}
+    height={100}
+  />
+)}
+</div>
+);
 }
