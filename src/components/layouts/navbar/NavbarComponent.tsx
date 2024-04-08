@@ -35,7 +35,7 @@ export default function App() {
             src={"/assets/pic.jpg"}
             alt={""}
           />
-          <p className="font-bold text-inherit">JESS SHOP</p>
+          <p className="font-bold text-inherit">THYDA SHOP</p>
         </NavbarBrand>
       </NavbarContent>
 
@@ -48,7 +48,7 @@ export default function App() {
             src={"/assets/pic.jpg"}
             alt={""}
           />
-          <p className="font-bold text-inherit">JESS SHOP</p>
+          <p className="font-bold text-inherit">THYDA SHOP</p>
         </NavbarBrand>
       </NavbarContent>
       <NavbarContent className="hidden sm:flex gap-4 lg: " justify="center">
