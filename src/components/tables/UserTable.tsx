@@ -82,21 +82,21 @@ const ProductTable = () => {
     {
       name: "Details",
       cell: (row) => (
-        <button onClick={() => handleDetail(row)}><BiDetail /></button>
+        <Button onClick={() => handleDetail(row)}><BiDetail /></Button>
       ),
     },
     {
       name: "Edit",
       cell: (row) => (
-        <button onClick={() => handleEdit(row)}><CiEdit /></button>
+        <Button onClick={() => handleEdit(row)}><CiEdit /></Button>
       ),
     },
     {
       name: "Delete",
       cell: (row) => (
-        <button onClick={() => handleDelete(row.id)} style={{ cursor: 'pointer', color: 'red', border: 'none', background: 'none' }}>
+        <Button onClick={() => handleDelete(row.name)} style={{ cursor: 'pointer', color: 'red', border: 'none', background: 'none' }}>
           <MdDelete />
-        </button>
+        </Button>
       ),
     },
     
